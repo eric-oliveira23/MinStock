@@ -8,12 +8,16 @@ import 'package:image_picker/image_picker.dart';
 import 'package:minstock/core/design_system/components/custom_snackbar.dart';
 import 'package:minstock/core/domain/product/entities/product_entity.dart';
 import 'package:minstock/core/domain/product/usecases/insert_product.dart';
+import 'package:minstock/core/domain/product/usecases/update_product.dart';
 import 'package:minstock/features/inventory/inventory_page/inventory_page_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:uuid/uuid.dart';
 
 class AddProductProvider extends ChangeNotifier {
   final InsertProduct _insertProduct;
+  final UpdateProduct _updateProduct;
+
+  final ProductEntity? selectedProduct;
 
   final _picker = ImagePicker();
 
@@ -34,14 +38,20 @@ class AddProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  AddProductProvider() : _insertProduct = GetIt.instance<InsertProduct>();
+  AddProductProvider(this.selectedProduct)
+      : _insertProduct = GetIt.instance<InsertProduct>(),
+        _updateProduct = GetIt.instance<UpdateProduct>() {
+    if (selectedProduct != null) {
+      getProductInfos();
+    }
+  }
 
   // t e x t  c o n t r o l l e r s
 
   final TextEditingController _nameController = TextEditingController();
   TextEditingController get nameController => _nameController;
 
-  final TextEditingController _quantityController = TextEditingController();
+  final TextEditingController _quantityController = TextEditingController(text: "1");
   TextEditingController get quantityController => _quantityController;
 
   final TextEditingController _valueController =
@@ -60,17 +70,30 @@ class AddProductProvider extends ChangeNotifier {
     }
   }
 
+  void getProductInfos() {
+    _nameController.text = selectedProduct?.name ?? "";
+    _valueController.text = (selectedProduct?.price ?? 0).toString();
+    _quantityController.text = (selectedProduct?.stockQuantity ?? 0).toString();
+    _image = selectedProduct?.image;
+  }
+
   Future<void> saveProduct(BuildContext context) async {
-    await _insertProduct.execute(
-      ProductEntity(
-        id: const Uuid().v4(),
-        name: nameController.text,
-        stockQuantity: 1,
-        price: double.parse(valueController.text),
-        isActive: activeProduct,
-        image: _image,
-      ),
+    final product = ProductEntity(
+      id: selectedProduct?.id ?? const Uuid().v4(),
+      name: nameController.text,
+      stockQuantity: 1,
+      price: double.parse(valueController.text),
+      isActive: activeProduct,
+      image: _image,
     );
+
+    print(product);
+
+    if (selectedProduct != null) {
+      await _updateProduct.execute(product);
+    } else {
+      await _insertProduct.execute(product);
+    }
 
     if (context.mounted) {
       await Provider.of<InventoryProvider>(context, listen: false).fetchProducts();

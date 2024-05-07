@@ -4,22 +4,31 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:minstock/core/design_system/components/opacity_animator.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
+import 'package:minstock/core/domain/product/entities/product_entity.dart';
 import 'package:minstock/features/add_product/add_product_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
-  static route() => AddProductTransition(
-        page: const AddProductPage(),
+  static route({ProductEntity? selectedProduct}) => AddProductTransition(
+        page: AddProductPage(selectedProduct: selectedProduct),
       );
 
-  const AddProductPage({super.key});
+  final ProductEntity? selectedProduct;
+
+  const AddProductPage({super.key, this.selectedProduct});
 
   @override
   State<AddProductPage> createState() => _AddProductPageState();
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  AddProductProvider addProductProvider = AddProductProvider();
+  late AddProductProvider addProductProvider;
+
+  @override
+  void initState() {
+    addProductProvider = AddProductProvider(widget.selectedProduct);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {

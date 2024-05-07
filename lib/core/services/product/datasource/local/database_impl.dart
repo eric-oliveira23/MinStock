@@ -30,7 +30,12 @@ class DatabaseImpl implements Database {
   @override
   Future<List<ProductModel>> update(ProductModel model) async {
     final box = await Hive.openBox<ProductModel>(_todoBoxKey);
-    await box.put(model.id, model);
+
+    int index = box.values.toList().indexWhere((element) => element.id == model.id);
+
+    if (index != -1) {
+      await box.putAt(index, model);
+    }
 
     return getAll();
   }

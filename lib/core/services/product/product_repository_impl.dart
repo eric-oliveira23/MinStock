@@ -18,8 +18,7 @@ class ProductRepositoryImpl extends ProductRepository {
 
   @override
   Future<List<ProductModel>> insert(ProductModel model) async {
-    await _database.insert(model);
-    return _database.getAll();
+    return await _database.insert(model);
   }
 
   @override
