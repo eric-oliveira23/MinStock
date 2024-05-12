@@ -37,7 +37,7 @@ class _AddProductPageState extends State<AddProductPage> {
       child: Scaffold(
         appBar: AppBar(
           leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
+            icon: const Icon(Icons.arrow_back),
             onPressed: () => Navigator.of(context).pop(),
           ),
           title: Text(widget.selectedProduct != null ? widget.selectedProduct?.name ?? "" : "Cadastrar produto"),
@@ -113,7 +113,6 @@ class _AddProductPageState extends State<AddProductPage> {
                         labelText: "Insira o valor do produto",
                         hintText: '0,00',
                         prefixText: "R\$ ",
-                        prefixStyle: TextStyle(color: Colors.white),
                       ),
                       keyboardType: TextInputType.number,
                     ),
@@ -128,7 +127,6 @@ class _AddProductPageState extends State<AddProductPage> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      tileColor: AppColors.grey2020,
                       shape: const OutlineInputBorder(
                         borderRadius: BorderRadius.all(
                           Radius.circular(12),
@@ -166,6 +164,7 @@ class _AddProductPageState extends State<AddProductPage> {
                                     style: TextStyle(
                                       fontSize: 15.sp,
                                       fontWeight: FontWeight.bold,
+                                      color: Colors.white,
                                     ),
                                   ),
                                   const Icon(
@@ -181,7 +180,10 @@ class _AddProductPageState extends State<AddProductPage> {
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("11 unidades disponíveis."),
+                                  Text(
+                                    "11 unidades disponíveis.",
+                                    style: TextStyle(color: Colors.white),
+                                  ),
                                   Row(
                                     children: [
                                       Icon(

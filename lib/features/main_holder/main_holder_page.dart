@@ -60,15 +60,14 @@ class _HolderPageState extends State<HolderPage> with TickerProviderStateMixin {
                 child: TabBar(
                   controller: _tabController,
                   splashBorderRadius: const BorderRadius.all(Radius.circular(20)),
-                  // splashFactory: NoSplash.splashFactory,
                   dividerHeight: 0,
                   tabs: const [
                     Tab(child: Center(child: Icon(Icons.sell_outlined))),
                     Tab(child: Center(child: Icon(Icons.inventory_2_outlined))),
                   ],
                   unselectedLabelColor: Colors.grey,
-                  labelColor: Colors.white,
-                  indicatorColor: Colors.white,
+                  // labelColor: Colors.white,
+                  // indicatorColor: Colors.white,
                 ),
               ),
             ],
