@@ -7,7 +7,7 @@ class ProductRepositoryImpl extends ProductRepository {
   final _database = GetIt.instance<Database>();
 
   @override
-  Future<bool> delete(int id) async {
+  Future<bool> delete(String id) async {
     return await _database.delete(id);
   }
 

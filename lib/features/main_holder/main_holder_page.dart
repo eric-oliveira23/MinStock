@@ -11,14 +11,14 @@ class HolderPage extends StatefulWidget {
 }
 
 class _HolderPageState extends State<HolderPage> with TickerProviderStateMixin {
-  final List<String> _appBarTitles = ['Vendas', 'Estoque', 'Relatórios'];
+  final List<String> _appBarTitles = ['Vendas', 'Estoque'];
   final MainHolderProvider _mainHolderProvider = MainHolderProvider();
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _tabController.addListener(() => _mainHolderProvider.selectedIndex = _tabController.index);
   }
 
@@ -43,7 +43,7 @@ class _HolderPageState extends State<HolderPage> with TickerProviderStateMixin {
           centerTitle: true,
         ),
         body: DefaultTabController(
-          length: 3,
+          length: _appBarTitles.length,
           child: Column(
             children: [
               Expanded(
@@ -52,7 +52,6 @@ class _HolderPageState extends State<HolderPage> with TickerProviderStateMixin {
                   children: [
                     Container(),
                     const InventoryPage(),
-                    Container(),
                   ],
                 ),
               ),
@@ -66,7 +65,6 @@ class _HolderPageState extends State<HolderPage> with TickerProviderStateMixin {
                   tabs: const [
                     Tab(child: Center(child: Icon(Icons.sell_outlined))),
                     Tab(child: Center(child: Icon(Icons.inventory_2_outlined))),
-                    Tab(child: Center(child: Icon(Icons.stacked_bar_chart_sharp))),
                   ],
                   unselectedLabelColor: Colors.grey,
                   labelColor: Colors.white,

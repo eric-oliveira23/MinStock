@@ -14,6 +14,7 @@ class UpdateProduct {
       stockQuantity: product.stockQuantity,
       price: product.price,
       image: product.image,
+      isActive: product.isActive,
     );
 
     _productRepository.update(productModel);

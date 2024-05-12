@@ -18,6 +18,7 @@ class GetAllProducts {
             stockQuantity: product.stockQuantity,
             price: product.price,
             image: product.image,
+            isActive: product.isActive,
           ),
         )
         .toList();

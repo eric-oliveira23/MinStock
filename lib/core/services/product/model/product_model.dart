@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:convert';
 import 'dart:typed_data';
 
@@ -23,11 +22,15 @@ class ProductModel {
   @HiveField(4)
   final Uint8List? image;
 
+  @HiveField(5)
+  final bool isActive;
+
   ProductModel({
     required this.id,
     required this.name,
     required this.stockQuantity,
     required this.price,
+    required this.isActive,
     this.image,
   });
 
@@ -37,6 +40,7 @@ class ProductModel {
     int? stockQuantity,
     double? price,
     Uint8List? image,
+    bool? isActive,
   }) {
     return ProductModel(
       id: id ?? this.id,
@@ -44,6 +48,7 @@ class ProductModel {
       stockQuantity: stockQuantity ?? this.stockQuantity,
       price: price ?? this.price,
       image: image ?? this.image,
+      isActive: isActive ?? this.isActive,
     );
   }
 
@@ -54,6 +59,7 @@ class ProductModel {
       'stockQuantity': stockQuantity,
       'price': price,
       'image': image,
+      'isActive': isActive,
     };
   }
 
@@ -64,6 +70,7 @@ class ProductModel {
       stockQuantity: map['stockQuantity'] as int,
       price: map['price'] as double,
       image: map['image'] as Uint8List,
+      isActive: map['isActive'] as bool,
     );
   }
 
@@ -84,11 +91,12 @@ class ProductModel {
         other.name == name &&
         other.stockQuantity == stockQuantity &&
         other.price == price &&
+        other.isActive == isActive &&
         other.image == image;
   }
 
   @override
   int get hashCode {
-    return id.hashCode ^ name.hashCode ^ stockQuantity.hashCode ^ price.hashCode ^ image.hashCode;
+    return id.hashCode ^ name.hashCode ^ stockQuantity.hashCode ^ price.hashCode ^ image.hashCode ^ isActive.hashCode;
   }
 }

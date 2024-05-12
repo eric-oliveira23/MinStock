@@ -21,6 +21,7 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
       name: fields[1] as String,
       stockQuantity: fields[2] as int,
       price: fields[3] as double,
+      isActive: fields[5] as bool,
       image: fields[4] as Uint8List?,
     );
   }
@@ -28,7 +29,7 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
   @override
   void write(BinaryWriter writer, ProductModel obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class ProductModelAdapter extends TypeAdapter<ProductModel> {
       ..writeByte(3)
       ..write(obj.price)
       ..writeByte(4)
-      ..write(obj.image);
+      ..write(obj.image)
+      ..writeByte(5)
+      ..write(obj.isActive);
   }
 
   @override

@@ -24,12 +24,8 @@ class AddProductProvider extends ChangeNotifier {
   Uint8List? _image;
   Uint8List? get image => _image;
 
-  final bool _activeProduct = false;
+  bool _activeProduct = false;
   bool get activeProduct => _activeProduct;
-  set activeProduct(bool value) {
-    activeProduct = value;
-    notifyListeners();
-  }
 
   final int _stockQuantity = 0;
   int get stockQuantity => _stockQuantity;
@@ -70,30 +66,35 @@ class AddProductProvider extends ChangeNotifier {
     }
   }
 
+  void handleActiveSwitch(bool value) {
+    _activeProduct = value;
+    notifyListeners();
+  }
+
   void getProductInfos() {
     _nameController.text = selectedProduct?.name ?? "";
     _valueController.text = (selectedProduct?.price ?? 0).toString();
     _quantityController.text = (selectedProduct?.stockQuantity ?? 0).toString();
     _image = selectedProduct?.image;
+    _activeProduct = selectedProduct?.isActive ?? false;
   }
 
   Future<void> saveProduct(BuildContext context) async {
+    if (nameController.text.isEmpty || valueController.text == '0.00') {
+      showSnackBar(context, const Text("Informe os dados corretamente."));
+      return;
+    }
+
     final product = ProductEntity(
       id: selectedProduct?.id ?? const Uuid().v4(),
       name: nameController.text,
       stockQuantity: 1,
-      price: double.parse(valueController.text),
-      isActive: activeProduct,
+      price: double.parse(valueController.text.replaceAll(RegExp(r'[^0-9.]'), '')),
+      isActive: _activeProduct,
       image: _image,
     );
 
-    print(product);
-
-    if (selectedProduct != null) {
-      await _updateProduct.execute(product);
-    } else {
-      await _insertProduct.execute(product);
-    }
+    selectedProduct != null ? await _updateProduct.execute(product) : await _insertProduct.execute(product);
 
     if (context.mounted) {
       await Provider.of<InventoryProvider>(context, listen: false).fetchProducts();

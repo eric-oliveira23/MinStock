@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:minstock/core/design_system/components/opacity_animator.dart';
+import 'package:lottie/lottie.dart';
+import 'package:minstock/core/common/helper/currency_formatter.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
 import 'package:minstock/core/domain/product/entities/product_entity.dart';
 import 'package:minstock/features/add_product/add_product_page.dart';
@@ -17,16 +19,26 @@ class InventoryPage extends StatefulWidget {
 }
 
 class _InventoryPageState extends State<InventoryPage> {
+  late final InventoryProvider inventoryProvider;
+
+  @override
+  void initState() {
+    inventoryProvider = Provider.of<InventoryProvider>(context, listen: false);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SizedBox.expand(
         child: SingleChildScrollView(
+          controller: inventoryProvider.scrollController,
           child: Column(
             children: [
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: TextField(
+                  onChanged: (value) => inventoryProvider.searchProducts(value),
                   decoration: InputDecoration(
                     hintText: "Pesquise produtos...",
                     hintStyle: const TextStyle(color: Colors.grey),
@@ -70,12 +82,49 @@ class _InventoryPageState extends State<InventoryPage> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Consumer<InventoryProvider>(
-                      builder: (_, value, __) => ListView.builder(
-                        physics: const NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        itemCount: value.products.length,
-                        itemBuilder: (_, index) => ProductTile(product: value.products[index]),
-                      ),
+                      builder: (_, value, __) {
+                        if (value.searchedProducts.isEmpty) {
+                          final size = MediaQuery.of(context).size;
+
+                          return Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Animate(
+                              effects: const [FadeEffect(delay: Duration(milliseconds: 200))],
+                              child: Column(
+                                children: [
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Oooops!",
+                                    style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 20),
+                                  Animate(
+                                      effects: const [ScaleEffect(delay: Duration(milliseconds: 500))],
+                                      child: Lottie.asset('assets/anim/empty_list.json', width: size.width / 2)),
+                                  const SizedBox(height: 20),
+                                  Text(
+                                    "Parece que não há movimento por aqui...\nTente mudar a pesquisa, ou adicione um novo produto :)",
+                                    style: TextStyle(fontSize: 13.sp, fontWeight: FontWeight.bold),
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }
+                        return ListView.separated(
+                          itemCount: value.searchedProducts.length,
+                          physics: const NeverScrollableScrollPhysics(),
+                          shrinkWrap: true,
+                          itemBuilder: (context, index) => Animate(
+                              effects: const [SlideEffect(begin: Offset(1, 0))],
+                              child: ProductTile(product: value.searchedProducts[index])),
+                          separatorBuilder: (context, index) => Divider(
+                            color: Colors.grey.shade800,
+                            thickness: .7,
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -84,9 +133,20 @@ class _InventoryPageState extends State<InventoryPage> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => Navigator.push(context, AddProductPage.route()),
-        child: const Icon(Icons.add),
+      floatingActionButton: ListenableBuilder(
+        listenable: inventoryProvider,
+        builder: (context, child) => IgnorePointer(
+          ignoring: !inventoryProvider.visibleFab,
+          child: AnimatedOpacity(
+            alwaysIncludeSemantics: false,
+            duration: const Duration(milliseconds: 200),
+            opacity: inventoryProvider.visibleFab ? 1 : 0,
+            child: FloatingActionButton(
+              onPressed: () => Navigator.push(context, AddProductPage.route()),
+              child: const Icon(Icons.add),
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -95,82 +155,161 @@ class _InventoryPageState extends State<InventoryPage> {
 class ProductTile extends StatelessWidget {
   final ProductEntity product;
 
-  const ProductTile({super.key, required this.product});
+  const ProductTile({Key? key, required this.product}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return OpacityAnimator(
+    return InkWell(
       onTap: () => Navigator.push(context, AddProductPage.route(selectedProduct: product)),
+      onLongPress: () {
+        final RenderBox overlay = Overlay.of(context).context.findRenderObject() as RenderBox;
+        final RenderBox itemBox = context.findRenderObject() as RenderBox;
+        final Offset position = itemBox.localToGlobal(itemBox.size.bottomRight(Offset.zero), ancestor: overlay);
+
+        showMenu(
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(5),
+            ),
+            side: BorderSide(color: Colors.white.withOpacity(.5), width: .5),
+          ),
+          color: Colors.black.withOpacity(.9),
+          context: context,
+          position: RelativeRect.fromLTRB(
+            position.dx,
+            position.dy,
+            position.dx,
+            position.dy,
+          ),
+          items: [
+            PopupMenuItem(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(5),
+                leading: const Icon(Icons.edit, color: Colors.white),
+                title: const Text(
+                  'Editar',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () => Navigator.pop(context),
+              ),
+            ),
+            PopupMenuItem(
+              padding: EdgeInsets.zero,
+              child: ListTile(
+                contentPadding: const EdgeInsets.all(5),
+                leading: const Icon(Icons.delete, color: Colors.white),
+                title: const Text(
+                  'Excluir',
+                  style: TextStyle(color: Colors.white),
+                ),
+                onTap: () {
+                  Navigator.pop(context);
+                  showDialog(
+                    context: context,
+                    builder: (context) => RemoveProductDialog(productEntity: product),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+      borderRadius: const BorderRadius.all(Radius.circular(10)),
       child: Padding(
         padding: const EdgeInsets.all(5),
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: const BorderRadius.all(
-              Radius.circular(20),
-            ),
-            color: AppColors.black2121,
-          ),
-          padding: EdgeInsets.all(16.sp),
-          child: Column(
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 80,
-                        height: 80,
-                        decoration: BoxDecoration(
-                          color: AppColors.grey2020,
-                          border: Border.all(color: AppColors.black1A1E),
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(10),
-                          ),
-                        ),
-                        child: product.image == null
-                            ? const Icon(
-                                CupertinoIcons.photo,
-                                color: Colors.white,
-                              )
-                            : ClipRRect(
-                                borderRadius: const BorderRadius.all(
-                                  Radius.circular(20),
-                                ),
-                                child: Image.memory(
-                                  product.image!,
-                                  width: 60,
-                                  height: 60,
-                                  fit: BoxFit.cover,
-                                ),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    product.image == null
+                        ? Container(
+                            width: 80,
+                            height: 80,
+                            decoration: BoxDecoration(
+                              color: AppColors.grey2020,
+                              border: Border.all(color: AppColors.black1A1E),
+                              borderRadius: const BorderRadius.all(
+                                Radius.circular(10),
                               ),
-                      ),
-                      SizedBox(width: 12.sp),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            product.name,
-                            style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                            ),
+                            child: const Icon(
+                              CupertinoIcons.photo,
+                              color: Colors.white,
+                            ),
+                          )
+                        : ClipRRect(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(20),
+                            ),
+                            child: Image.memory(
+                              product.image!,
+                              width: 80,
+                              height: 80,
+                              fit: BoxFit.cover,
+                            ),
                           ),
-                          Text(
-                            "Estoque ${product.stockQuantity}",
-                            style: TextStyle(fontSize: 11.sp),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  Text(
-                    product.price.toString(),
-                    style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                    SizedBox(width: 12.sp),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          product.name,
+                          style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          "Estoque ${product.stockQuantity}",
+                          style: TextStyle(fontSize: 11.sp),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+                Text(
+                  CurrencyFormatter.formatAsBRL(product.price),
+                  style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ],
         ),
+      ),
+    );
+  }
+}
+
+class RemoveProductDialog extends StatelessWidget {
+  final ProductEntity productEntity;
+
+  const RemoveProductDialog({super.key, required this.productEntity});
+
+  @override
+  Widget build(BuildContext context) {
+    return Animate(
+      effects: const [
+        SlideEffect(begin: Offset(0, 1)),
+        FadeEffect(duration: Duration(milliseconds: 500)),
+      ],
+      child: AlertDialog(
+        backgroundColor: AppColors.black1A1E,
+        title: const Text(
+          "Espera aí!",
+          style: TextStyle(color: Colors.white),
+        ),
+        content: Text("Deseja mesmo excluir o produto ${productEntity.name}?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Provider.of<InventoryProvider>(context, listen: false).removeProduct(productEntity.id);
+              Navigator.pop(context);
+            },
+            child: const Text("Excluir"),
+          ),
+        ],
       ),
     );
   }

@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:minstock/core/domain/product/usecases/delete_product.dart';
 import 'package:minstock/core/domain/product/usecases/get_all_products.dart';
 import 'package:minstock/core/domain/product/usecases/insert_product.dart';
 import 'package:minstock/core/domain/product/usecases/update_product.dart';
@@ -13,4 +14,5 @@ void injectDependencies() {
   getIt.registerLazySingleton(() => GetAllProducts(productRepository: ProductRepositoryImpl()));
   getIt.registerLazySingleton(() => InsertProduct(productRepository: ProductRepositoryImpl()));
   getIt.registerLazySingleton(() => UpdateProduct(productRepository: ProductRepositoryImpl()));
+  getIt.registerLazySingleton(() => DeleteProduct(productRepository: ProductRepositoryImpl()));
 }

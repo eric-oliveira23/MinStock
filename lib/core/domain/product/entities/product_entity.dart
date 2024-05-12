@@ -13,7 +13,7 @@ class ProductEntity {
     required this.name,
     required this.stockQuantity,
     required this.price,
-    this.isActive = false,
+    required this.isActive,
     this.image,
   });
 }

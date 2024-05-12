@@ -40,7 +40,7 @@ class _AddProductPageState extends State<AddProductPage> {
             icon: const Icon(Icons.arrow_back, color: Colors.white),
             onPressed: () => Navigator.of(context).pop(),
           ),
-          title: const Text("Cadastrar produto"),
+          title: Text(widget.selectedProduct != null ? widget.selectedProduct?.name ?? "" : "Cadastrar produto"),
           actions: [
             CupertinoButton(
               onPressed: () async => await addProductProvider.saveProduct(context),
@@ -50,17 +50,17 @@ class _AddProductPageState extends State<AddProductPage> {
         ),
         body: SizedBox.expand(
           child: SingleChildScrollView(
-            child: Column(
-              children: [
-                SizedBox(height: 16.sp),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: ListenableBuilder(
-                        listenable: addProductProvider,
-                        builder: (context, _) => OpacityAnimator(
+            child: ListenableBuilder(
+              listenable: addProductProvider,
+              builder: (context, _) => Column(
+                children: [
+                  SizedBox(height: 16.sp),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(left: 12),
+                        child: OpacityAnimator(
                           onTap: () async => await addProductProvider.getImage(context),
                           child: Container(
                             width: 80,
@@ -91,113 +91,115 @@ class _AddProductPageState extends State<AddProductPage> {
                           ),
                         ),
                       ),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: TextField(
+                            controller: addProductProvider.nameController,
+                            inputFormatters: [LengthLimitingTextInputFormatter(15)],
+                            decoration: const InputDecoration(labelText: "Insira o nome do produto"),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: TextField(
+                      controller: addProductProvider.valueController,
+                      inputFormatters: [LengthLimitingTextInputFormatter(12)],
+                      decoration: const InputDecoration(
+                        labelText: "Insira o valor do produto",
+                        hintText: '0,00',
+                        prefixText: "R\$ ",
+                        prefixStyle: TextStyle(color: Colors.white),
+                      ),
+                      keyboardType: TextInputType.number,
                     ),
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: TextField(
-                          controller: addProductProvider.nameController,
-                          decoration: const InputDecoration(labelText: "Insira o nome do produto"),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: SwitchListTile(
+                      title: Text(
+                        addProductProvider.activeProduct ? "Ativo" : "Inativo",
+                        style: TextStyle(
+                          color: addProductProvider.activeProduct ? Colors.green : Colors.red,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      tileColor: AppColors.grey2020,
+                      shape: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(
+                          Radius.circular(12),
+                        ),
+                        borderSide: BorderSide.none,
+                      ),
+                      activeColor: Colors.green,
+                      inactiveThumbColor: Colors.red,
+                      value: addProductProvider.activeProduct,
+                      onChanged: (value) => addProductProvider.handleActiveSwitch(value),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: OpacityAnimator(
+                      onTap: () => _showSimpleBottomSheet(context),
+                      child: Card(
+                        surfaceTintColor: Colors.transparent,
+                        color: Colors.black,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: const BorderRadius.all(
+                              Radius.circular(12),
+                            ),
+                            side: BorderSide(color: AppColors.black1A1E)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(30, 30, 30, 8),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    "Estoque",
+                                    style: TextStyle(
+                                      fontSize: 15.sp,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    color: Colors.white,
+                                  )
+                                ],
+                              ),
+                            ),
+                            Divider(color: AppColors.black1A1E),
+                            const Padding(
+                              padding: EdgeInsets.fromLTRB(30, 8, 30, 30),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("11 unidades disponíveis."),
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.check_circle,
+                                        color: Colors.green,
+                                      )
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            )
+                          ],
                         ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 5),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: TextField(
-                    controller: addProductProvider.valueController,
-                    decoration: const InputDecoration(
-                      labelText: "Insira o valor do produto",
-                      hintText: '0,00',
-                      prefixText: "R\$ ",
-                      prefixStyle: TextStyle(color: Colors.white),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: SwitchListTile(
-                    title: const Text(
-                      "Ativo",
-                      style: TextStyle(
-                        color: Colors.green,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    value: true,
-                    tileColor: AppColors.grey2020,
-                    shape: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(12),
-                      ),
-                      borderSide: BorderSide.none,
-                    ),
-                    activeColor: Colors.green,
-                    inactiveThumbColor: Colors.red,
-                    onChanged: (value) {},
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: OpacityAnimator(
-                    onTap: () => _showSimpleBottomSheet(context),
-                    child: Card(
-                      surfaceTintColor: Colors.transparent,
-                      color: Colors.black,
-                      shape: RoundedRectangleBorder(
-                          borderRadius: const BorderRadius.all(
-                            Radius.circular(12),
-                          ),
-                          side: BorderSide(color: AppColors.black1A1E)),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  "Estoque",
-                                  style: TextStyle(
-                                    fontSize: 15.sp,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                                const Icon(
-                                  Icons.arrow_forward_ios_rounded,
-                                  color: Colors.white,
-                                )
-                              ],
-                            ),
-                          ),
-                          Divider(color: AppColors.black1A1E),
-                          const Padding(
-                            padding: EdgeInsets.fromLTRB(16, 0, 16, 8),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text("11 unidades disponíveis."),
-                                Row(
-                                  children: [
-                                    Icon(
-                                      Icons.check_circle,
-                                      color: Colors.green,
-                                    )
-                                  ],
-                                ),
-                              ],
-                            ),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                )
-              ],
+                  )
+                ],
+              ),
             ),
           ),
         ),
@@ -225,7 +227,7 @@ class _AddProductPageState extends State<AddProductPage> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(16),
                 child: TextField(
                   controller: addProductProvider.quantityController,
                   keyboardType: TextInputType.number,
@@ -233,6 +235,7 @@ class _AddProductPageState extends State<AddProductPage> {
                   textAlign: TextAlign.center,
                   inputFormatters: [
                     FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                    LengthLimitingTextInputFormatter(3)
                   ],
                   decoration: InputDecoration(
                     labelText: "Insira a quantidade de estoque",

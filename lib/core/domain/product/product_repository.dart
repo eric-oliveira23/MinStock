@@ -4,5 +4,5 @@ abstract class ProductRepository {
   Future<List<ProductModel>> getAll();
   Future<List<ProductModel>> insert(ProductModel model);
   Future<List<ProductModel>> update(ProductModel model);
-  Future<bool> delete(int id);
+  Future<bool> delete(String id);
 }
