@@ -5,7 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:minstock/core/design_system/components/opacity_animator.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
 import 'package:minstock/core/domain/product/entities/product_entity.dart';
-import 'package:minstock/features/add_product/add_product_provider.dart';
+import 'package:minstock/features/inventory/add_product/add_product_provider.dart';
 import 'package:provider/provider.dart';
 
 class AddProductPage extends StatefulWidget {
@@ -61,7 +61,8 @@ class _AddProductPageState extends State<AddProductPage> {
                       Padding(
                         padding: const EdgeInsets.only(left: 12),
                         child: OpacityAnimator(
-                          onTap: () async => await addProductProvider.getImage(context),
+                          // onTap: () async => await addProductProvider.getImage(context),
+                          onTap: () => _showCameraBottomSheet(context),
                           child: Container(
                             width: 80,
                             height: 80,
@@ -119,30 +120,32 @@ class _AddProductPageState extends State<AddProductPage> {
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12),
-                    child: SwitchListTile(
-                      title: Text(
-                        addProductProvider.activeProduct ? "Ativo" : "Inativo",
-                        style: TextStyle(
-                          color: addProductProvider.activeProduct ? Colors.green : Colors.red,
-                          fontWeight: FontWeight.bold,
+                    child: ListTileTheme(
+                      child: SwitchListTile(
+                        title: Text(
+                          addProductProvider.activeProduct ? "Ativo" : "Inativo",
+                          style: TextStyle(
+                            color: addProductProvider.activeProduct ? Colors.green : Colors.red,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                      ),
-                      shape: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(
-                          Radius.circular(12),
+                        shape: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(12),
+                          ),
+                          borderSide: BorderSide.none,
                         ),
-                        borderSide: BorderSide.none,
+                        activeColor: Colors.green,
+                        inactiveThumbColor: Colors.red,
+                        value: addProductProvider.activeProduct,
+                        onChanged: (value) => addProductProvider.handleActiveSwitch(value),
                       ),
-                      activeColor: Colors.green,
-                      inactiveThumbColor: Colors.red,
-                      value: addProductProvider.activeProduct,
-                      onChanged: (value) => addProductProvider.handleActiveSwitch(value),
                     ),
                   ),
                   Padding(
                     padding: const EdgeInsets.all(12),
                     child: OpacityAnimator(
-                      onTap: () => _showSimpleBottomSheet(context),
+                      onTap: () => _showQuantityBottomSheet(context),
                       child: Card(
                         surfaceTintColor: Colors.transparent,
                         color: Colors.black,
@@ -212,7 +215,18 @@ class _AddProductPageState extends State<AddProductPage> {
   // b o t t o m  s h e e t s
 
   // stock
-  Future<void> _showSimpleBottomSheet(BuildContext context) async {
+  Future<void> _showQuantityBottomSheet(BuildContext context) async {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      builder: (BuildContext context) {
+        return StockQuantityBottomSheet(addProductProvider: addProductProvider);
+      },
+    );
+  }
+
+  Future<void> _showCameraBottomSheet(BuildContext context) async {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
@@ -220,91 +234,128 @@ class _AddProductPageState extends State<AddProductPage> {
       builder: (BuildContext context) {
         return Padding(
           padding: EdgeInsets.fromLTRB(
-            16,
             0,
-            16,
+            0,
+            0,
             MediaQuery.of(context).viewInsets.bottom,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: TextField(
-                  controller: addProductProvider.quantityController,
-                  keyboardType: TextInputType.number,
-                  style: TextStyle(fontSize: 16.sp),
-                  textAlign: TextAlign.center,
-                  inputFormatters: [
-                    FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                    LengthLimitingTextInputFormatter(3)
-                  ],
-                  decoration: InputDecoration(
-                    labelText: "Insira a quantidade de estoque",
-                    prefixIcon: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: const CircleBorder(),
-                        ),
-                        child: const Icon(Icons.remove, color: Colors.red),
-                        onPressed: () {},
-                      ),
-                    ),
-                    suffixIcon: Padding(
-                      padding: const EdgeInsets.all(5),
-                      child: TextButton(
-                        style: TextButton.styleFrom(
-                          backgroundColor: Theme.of(context).primaryColor,
-                          shape: const CircleBorder(),
-                        ),
-                        child: const Icon(
-                          Icons.add,
-                          color: Colors.green,
-                        ),
-                        onPressed: () {},
-                      ),
-                    ),
-                  ),
-                ),
+              const Padding(
+                padding: EdgeInsets.only(left: 16),
+                child: Text("Selecione o modo de foto."),
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Row(children: [
-                  Expanded(
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
-                        'Cancelar',
-                      ),
-                    ),
+              const SizedBox(height: 15),
+              ListView(
+                shrinkWrap: true,
+                padding: EdgeInsets.zero,
+                children: [
+                  ListTile(
+                    title: const Text("Galeria"),
+                    onTap: () {},
+                    tileColor: Colors.transparent,
                   ),
-                  Expanded(
-                    child: TextButton(
-                      style: ButtonStyle(
-                        backgroundColor: MaterialStatePropertyAll(
-                          Theme.of(context).colorScheme.primary,
-                        ),
-                      ),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                      child: Text(
-                        'Salvar',
-                        style: TextStyle(color: Theme.of(context).primaryColor),
-                      ),
-                    ),
+                  ListTile(
+                    title: const Text("Tirar foto"),
+                    onTap: () {},
+                    tileColor: Colors.transparent,
                   ),
-                ]),
+                ],
               ),
-              const SizedBox(height: 10),
             ],
           ),
         );
       },
+    );
+  }
+}
+
+class StockQuantityBottomSheet extends StatelessWidget {
+  const StockQuantityBottomSheet({
+    super.key,
+    required this.addProductProvider,
+  });
+
+  final AddProductProvider addProductProvider;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        16,
+        0,
+        16,
+        MediaQuery.of(context).viewInsets.bottom,
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: TextField(
+              controller: addProductProvider.quantityController,
+              keyboardType: TextInputType.number,
+              style: TextStyle(fontSize: 16.sp),
+              textAlign: TextAlign.center,
+              inputFormatters: [
+                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                LengthLimitingTextInputFormatter(3)
+              ],
+              decoration: InputDecoration(
+                labelText: "Insira a quantidade de estoque",
+                prefixIcon: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      shape: const CircleBorder(),
+                    ),
+                    child: const Icon(Icons.remove, color: Colors.red),
+                    onPressed: () => addProductProvider.decrementStockQuantity(),
+                  ),
+                ),
+                suffixIcon: Padding(
+                  padding: const EdgeInsets.all(5),
+                  child: TextButton(
+                    style: TextButton.styleFrom(
+                      backgroundColor: Theme.of(context).primaryColor,
+                      shape: const CircleBorder(),
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Colors.green,
+                    ),
+                    onPressed: () => addProductProvider.incrementStockQuantity(),
+                  ),
+                ),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                style: ButtonStyle(
+                  backgroundColor: WidgetStatePropertyAll(
+                    Theme.of(context).colorScheme.primary,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: Text(
+                  'Fechar',
+                  style: TextStyle(color: Theme.of(context).primaryColor),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+        ],
+      ),
     );
   }
 }

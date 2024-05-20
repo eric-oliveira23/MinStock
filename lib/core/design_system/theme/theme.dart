@@ -1,12 +1,15 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
 
 final darkTheme = ThemeData(
   useMaterial3: true,
+  visualDensity: VisualDensity.adaptivePlatformDensity,
   scaffoldBackgroundColor: const Color(0xFF151517),
   primaryColor: const Color(0xFF151517),
-  colorScheme: ColorScheme.fromSwatch(primarySwatch: _white),
+  colorScheme: ColorScheme.fromSwatch(primarySwatch: _white).copyWith(onSecondary: AppColors.grey2020),
   fontFamily: GoogleFonts.comfortaa().fontFamily,
   appBarTheme: AppBarTheme(
     backgroundColor: const Color(0xFF151517),
@@ -39,8 +42,8 @@ final darkTheme = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF004A77)),
-      foregroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFF004A77)),
+      foregroundColor: WidgetStateProperty.all<Color>(
         const Color(0xffffffff),
       ),
     ),
@@ -57,12 +60,13 @@ final darkTheme = ThemeData(
   iconTheme: const IconThemeData(color: Colors.white),
   iconButtonTheme: const IconButtonThemeData(
     style: ButtonStyle(
-      iconColor: MaterialStatePropertyAll(Colors.white),
+      iconColor: WidgetStatePropertyAll(Colors.white),
     ),
   ),
   primaryIconTheme: const IconThemeData(color: Colors.white),
   listTileTheme: ListTileThemeData(
     tileColor: AppColors.grey2020,
+    titleTextStyle: const TextStyle().copyWith(color: Colors.white, fontFamily: GoogleFonts.comfortaa().fontFamily),
   ),
 );
 
@@ -70,13 +74,21 @@ final darkTheme = ThemeData(
 
 final lightTheme = ThemeData(
   useMaterial3: true,
+  visualDensity: VisualDensity.adaptivePlatformDensity,
   primaryColor: Colors.white,
-  scaffoldBackgroundColor: Colors.white,
-  colorScheme: ColorScheme.fromSwatch(primarySwatch: _black),
+  scaffoldBackgroundColor: Colors.grey.shade200,
+  colorScheme: ColorScheme.fromSwatch(primarySwatch: _black).copyWith(onSecondary: Colors.grey.shade300),
   fontFamily: GoogleFonts.comfortaa().fontFamily,
-  appBarTheme: const AppBarTheme(
+  appBarTheme: AppBarTheme(
     backgroundColor: Colors.white,
     centerTitle: true,
+    titleTextStyle: GoogleFonts.comfortaa(
+      textStyle: const TextStyle(
+        color: Colors.black,
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
+      ),
+    ),
   ),
   inputDecorationTheme: InputDecorationTheme(
     filled: true,
@@ -97,8 +109,8 @@ final lightTheme = ThemeData(
   ),
   elevatedButtonTheme: ElevatedButtonThemeData(
     style: ButtonStyle(
-      backgroundColor: MaterialStateProperty.all<Color>(const Color(0xFF004A77)),
-      foregroundColor: MaterialStateProperty.all<Color>(
+      backgroundColor: WidgetStateProperty.all<Color>(const Color(0xFF004A77)),
+      foregroundColor: WidgetStateProperty.all<Color>(
         const Color(0xffffffff),
       ),
     ),

@@ -6,7 +6,7 @@ import 'package:minstock/core/common/helper/currency_formatter.dart';
 import 'package:minstock/core/design_system/components/remove_product_dialog.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
 import 'package:minstock/core/domain/product/entities/product_entity.dart';
-import 'package:minstock/features/add_product/add_product_page.dart';
+import 'package:minstock/features/inventory/add_product/add_product_page.dart';
 
 class ProductCard extends StatelessWidget {
   final ProductEntity product;
@@ -25,6 +25,7 @@ class ProductCard extends StatelessWidget {
           final Offset position = itemBox.localToGlobal(itemBox.size.bottomRight(Offset.zero), ancestor: overlay);
 
           showMenu(
+            surfaceTintColor: Colors.black.withOpacity(.9),
             shape: RoundedRectangleBorder(
               borderRadius: const BorderRadius.all(
                 Radius.circular(5),
@@ -38,6 +39,7 @@ class ProductCard extends StatelessWidget {
               PopupMenuItem(
                 padding: EdgeInsets.zero,
                 child: ListTile(
+                  tileColor: Colors.black.withOpacity(.9),
                   contentPadding: EdgeInsets.zero,
                   title: const Center(
                     child: Text(
@@ -45,12 +47,16 @@ class ProductCard extends StatelessWidget {
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
-                  onTap: () => Navigator.pop(context),
+                  onTap: () {
+                    Navigator.pop(context);
+                    Navigator.push(context, AddProductPage.route(selectedProduct: product));
+                  },
                 ),
               ),
               PopupMenuItem(
                 padding: EdgeInsets.zero,
                 child: ListTile(
+                  tileColor: Colors.black.withOpacity(.9),
                   contentPadding: EdgeInsets.zero,
                   titleAlignment: ListTileTitleAlignment.center,
                   title: const Center(

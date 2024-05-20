@@ -2,7 +2,7 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:lottie/lottie.dart';
 import 'package:minstock/core/design_system/components/product_card.dart';
-import 'package:minstock/features/add_product/add_product_page.dart';
+import 'package:minstock/features/inventory/add_product/add_product_page.dart';
 import 'package:minstock/features/inventory/inventory_page/inventory_page_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -27,6 +27,9 @@ class _InventoryPageState extends State<InventoryPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text("MinStock"),
+      ),
       body: SizedBox.expand(
         child: SingleChildScrollView(
           controller: inventoryProvider.scrollController,

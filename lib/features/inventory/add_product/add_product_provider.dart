@@ -27,12 +27,8 @@ class AddProductProvider extends ChangeNotifier {
   bool _activeProduct = false;
   bool get activeProduct => _activeProduct;
 
-  final int _stockQuantity = 0;
+  int _stockQuantity = 0;
   int get stockQuantity => _stockQuantity;
-  set stockQuantity(int value) {
-    stockQuantity = value;
-    notifyListeners();
-  }
 
   AddProductProvider(this.selectedProduct)
       : _insertProduct = GetIt.instance<InsertProduct>(),
@@ -47,7 +43,7 @@ class AddProductProvider extends ChangeNotifier {
   final TextEditingController _nameController = TextEditingController();
   TextEditingController get nameController => _nameController;
 
-  final TextEditingController _quantityController = TextEditingController(text: "1");
+  final TextEditingController _quantityController = TextEditingController();
   TextEditingController get quantityController => _quantityController;
 
   final TextEditingController _valueController =
@@ -71,10 +67,22 @@ class AddProductProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void incrementStockQuantity() {
+    _stockQuantity++;
+    _quantityController.text = _stockQuantity.toString();
+  }
+
+  void decrementStockQuantity() {
+    if (_stockQuantity == 0) return;
+    _stockQuantity--;
+    _quantityController.text = _stockQuantity.toString();
+  }
+
   void getProductInfos() {
     _nameController.text = selectedProduct?.name ?? "";
     _valueController.text = (selectedProduct?.price ?? 0).toString();
     _quantityController.text = (selectedProduct?.stockQuantity ?? 0).toString();
+    _stockQuantity = (selectedProduct?.stockQuantity ?? 0);
     _image = selectedProduct?.image;
     _activeProduct = selectedProduct?.isActive ?? false;
   }
@@ -88,7 +96,7 @@ class AddProductProvider extends ChangeNotifier {
     final product = ProductEntity(
       id: selectedProduct?.id ?? const Uuid().v4(),
       name: nameController.text,
-      stockQuantity: 1,
+      stockQuantity: _stockQuantity,
       price: double.parse(valueController.text.replaceAll(RegExp(r'[^0-9.]'), '')),
       isActive: _activeProduct,
       image: _image,

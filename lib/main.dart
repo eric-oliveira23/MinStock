@@ -3,8 +3,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:minstock/core/common/helper/hive_helper.dart';
 import 'package:minstock/core/design_system/theme/theme.dart';
 import 'package:minstock/core/injector.dart';
+import 'package:minstock/features/inventory/inventory_page/inventory_page.dart';
 import 'package:minstock/features/inventory/inventory_page/inventory_page_provider.dart';
-import 'package:minstock/features/main_holder/main_holder_page.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
@@ -36,7 +36,7 @@ class MinStock extends StatelessWidget {
           title: 'MinStock',
           theme: lightTheme,
           darkTheme: darkTheme,
-          home: const HolderPage(),
+          home: const InventoryPage(),
         ),
       ),
     );
