@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:minstock/core/design_system/components/opacity_animator.dart';
+import 'package:minstock/core/design_system/components/show_camera_bs.dart';
+import 'package:minstock/core/design_system/components/stock_quantity_bs.dart';
 import 'package:minstock/core/design_system/theme/app_colors.dart';
 import 'package:minstock/core/domain/product/entities/product_entity.dart';
 import 'package:minstock/features/inventory/add_product/add_product_provider.dart';
@@ -61,7 +63,6 @@ class _AddProductPageState extends State<AddProductPage> {
                       Padding(
                         padding: const EdgeInsets.only(left: 12),
                         child: OpacityAnimator(
-                          // onTap: () async => await addProductProvider.getImage(context),
                           onTap: () => _showCameraBottomSheet(context),
                           child: Container(
                             width: 80,
@@ -178,20 +179,30 @@ class _AddProductPageState extends State<AddProductPage> {
                               ),
                             ),
                             Divider(color: AppColors.black1A1E),
-                            const Padding(
-                              padding: EdgeInsets.fromLTRB(30, 8, 30, 30),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(30, 8, 30, 30),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text(
-                                    "11 unidades disponíveis.",
-                                    style: TextStyle(color: Colors.white),
-                                  ),
+                                  Builder(builder: (context) {
+                                    if (addProductProvider.stockQuantity == 0) {
+                                      return const Text(
+                                        "Nenhuma unidade disponível.",
+                                        style: TextStyle(color: Colors.white),
+                                      );
+                                    }
+                                    return Text(
+                                      "${addProductProvider.stockQuantity} ${addProductProvider.stockQuantity == 1 ? "unidade disponível" : "unidades disponíveis."}",
+                                      style: const TextStyle(color: Colors.white),
+                                    );
+                                  }),
                                   Row(
                                     children: [
                                       Icon(
-                                        Icons.check_circle,
-                                        color: Colors.green,
+                                        addProductProvider.stockQuantity >= 1
+                                            ? Icons.check_circle
+                                            : Icons.error_outlined,
+                                        color: addProductProvider.stockQuantity >= 1 ? Colors.green : Colors.red,
                                       )
                                     ],
                                   ),
@@ -214,7 +225,6 @@ class _AddProductPageState extends State<AddProductPage> {
 
   // b o t t o m  s h e e t s
 
-  // stock
   Future<void> _showQuantityBottomSheet(BuildContext context) async {
     showModalBottomSheet<void>(
       context: context,
@@ -232,130 +242,8 @@ class _AddProductPageState extends State<AddProductPage> {
       isScrollControlled: true,
       showDragHandle: true,
       builder: (BuildContext context) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            0,
-            0,
-            0,
-            MediaQuery.of(context).viewInsets.bottom,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Padding(
-                padding: EdgeInsets.only(left: 16),
-                child: Text("Selecione o modo de foto."),
-              ),
-              const SizedBox(height: 15),
-              ListView(
-                shrinkWrap: true,
-                padding: EdgeInsets.zero,
-                children: [
-                  ListTile(
-                    title: const Text("Galeria"),
-                    onTap: () {},
-                    tileColor: Colors.transparent,
-                  ),
-                  ListTile(
-                    title: const Text("Tirar foto"),
-                    onTap: () {},
-                    tileColor: Colors.transparent,
-                  ),
-                ],
-              ),
-            ],
-          ),
-        );
+        return ShowCameraBottomSheet(addProductProvider: addProductProvider);
       },
-    );
-  }
-}
-
-class StockQuantityBottomSheet extends StatelessWidget {
-  const StockQuantityBottomSheet({
-    super.key,
-    required this.addProductProvider,
-  });
-
-  final AddProductProvider addProductProvider;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        16,
-        0,
-        16,
-        MediaQuery.of(context).viewInsets.bottom,
-      ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: addProductProvider.quantityController,
-              keyboardType: TextInputType.number,
-              style: TextStyle(fontSize: 16.sp),
-              textAlign: TextAlign.center,
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
-                LengthLimitingTextInputFormatter(3)
-              ],
-              decoration: InputDecoration(
-                labelText: "Insira a quantidade de estoque",
-                prefixIcon: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: const CircleBorder(),
-                    ),
-                    child: const Icon(Icons.remove, color: Colors.red),
-                    onPressed: () => addProductProvider.decrementStockQuantity(),
-                  ),
-                ),
-                suffixIcon: Padding(
-                  padding: const EdgeInsets.all(5),
-                  child: TextButton(
-                    style: TextButton.styleFrom(
-                      backgroundColor: Theme.of(context).primaryColor,
-                      shape: const CircleBorder(),
-                    ),
-                    child: const Icon(
-                      Icons.add,
-                      color: Colors.green,
-                    ),
-                    onPressed: () => addProductProvider.incrementStockQuantity(),
-                  ),
-                ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: SizedBox(
-              width: double.infinity,
-              child: TextButton(
-                style: ButtonStyle(
-                  backgroundColor: WidgetStatePropertyAll(
-                    Theme.of(context).colorScheme.primary,
-                  ),
-                ),
-                onPressed: () {
-                  Navigator.pop(context);
-                },
-                child: Text(
-                  'Fechar',
-                  style: TextStyle(color: Theme.of(context).primaryColor),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-        ],
-      ),
     );
   }
 }

@@ -27,7 +27,20 @@ dependencies:
   intl: ^0.19.0
   lottie: ^3.1.0
 
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/images/ic_launcher.png"
+  min_sdk_android: 21 
+  icon_size: 200
+  background_color: "#D9D9D9"
+  theme_color: "#D9D9D9"
+
 dev_dependencies:
+
+  flutter_launcher_icons: "^0.13.1"
+
   flutter_test:
     sdk: flutter
 

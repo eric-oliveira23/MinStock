@@ -50,8 +50,8 @@ class AddProductProvider extends ChangeNotifier {
       MoneyMaskedTextController(decimalSeparator: '.', thousandSeparator: ',');
   TextEditingController get valueController => _valueController;
 
-  Future getImage(BuildContext context) async {
-    final pickedFile = await _picker.pickImage(source: ImageSource.camera);
+  Future getImage(BuildContext context, ImageSource imageSource) async {
+    final pickedFile = await _picker.pickImage(source: imageSource);
     if (pickedFile != null) {
       _image = await File(pickedFile.path).readAsBytes();
       notifyListeners();
@@ -70,12 +70,16 @@ class AddProductProvider extends ChangeNotifier {
   void incrementStockQuantity() {
     _stockQuantity++;
     _quantityController.text = _stockQuantity.toString();
+
+    notifyListeners();
   }
 
   void decrementStockQuantity() {
     if (_stockQuantity == 0) return;
     _stockQuantity--;
     _quantityController.text = _stockQuantity.toString();
+
+    notifyListeners();
   }
 
   void getProductInfos() {
